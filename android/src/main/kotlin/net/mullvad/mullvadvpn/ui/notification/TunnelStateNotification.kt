@@ -68,7 +68,10 @@ class TunnelStateNotification(
     private fun blockingErrorMessage(cause: ErrorStateCause): String {
         val messageId = when (cause) {
             is ErrorStateCause.InvalidDnsServer -> {
-                return context.getString(R.string.invalid_dns_server, cause.address)
+                val hostNameAndAddress = cause.address.toString().split('/', limit = 2)
+                val address = hostNameAndAddress[1]
+
+                return context.getString(R.string.invalid_dns_server, address)
             }
             is ErrorStateCause.AuthFailed -> R.string.auth_failed
             is ErrorStateCause.Ipv6Unavailable -> R.string.ipv6_unavailable

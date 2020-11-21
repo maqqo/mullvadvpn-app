@@ -3,6 +3,8 @@ use crate::net::TunnelEndpoint;
 use jnix::IntoJava;
 use serde::{Deserialize, Serialize};
 use std::fmt;
+#[cfg(target_os = "android")]
+use std::net::IpAddr;
 
 /// Event emitted from the states in `talpid_core::tunnel_state_machine` when the tunnel state
 /// machine enters a new state.
@@ -90,6 +92,9 @@ pub enum ErrorStateCause {
     SetFirewallPolicyError(FirewallPolicyError),
     /// Failed to set system DNS server.
     SetDnsError,
+    /// Android has rejected a DNS server address.
+    #[cfg(target_os = "android")]
+    InvalidDnsServer(IpAddr),
     /// Failed to start connection to remote server.
     StartTunnelError,
     /// Tunnel parameter generation failure
@@ -170,6 +175,14 @@ impl fmt::Display for ErrorStateCause {
                 };
             }
             SetDnsError => "Failed to set system DNS server",
+            #[cfg(target_os = "android")]
+            InvalidDnsServer(address) => {
+                return write!(
+                    f,
+                    "Invalid DNS server address used in tunnel configuration: {}",
+                    address
+                );
+            }
             StartTunnelError => "Failed to start connection to remote server",
             TunnelParameterError(ref err) => {
                 return write!(f, "Failure to generate tunnel parameters: {}", err);
